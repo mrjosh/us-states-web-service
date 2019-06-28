@@ -1,11 +1,11 @@
 ## Build the docker image
 ```bash
-docker build . --tag=us-states-webservice
+docker-compose build
 ```
 
 ## Run the docker image
 ```bash
-docker run -dp 8001:8001 us-states-webservice
+docker-compose up -d
 ```
 
 ### Ez :)
