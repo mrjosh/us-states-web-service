@@ -9,42 +9,37 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var port = ":8001"
-
 func main() {
 
 	r := mux.NewRouter()
 
-	if len(os.Args) > 1 {
-		port = os.Args[1]
-	}
-
 	r.HandleFunc("/{state}/cities.json", func (w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		state := vars["state"]
 
-		jsonFile, err := os.Open("./US_States_and_Cities.json")
+		w.Header().Set("Content-Type", "application/json")
 
-		// if we os.Open returns an error then handle it
-		if err != nil {
-			fmt.Println(err)
+		state := mux.Vars(r)["state"]
+
+		jsonFile, jErr := os.Open("./US_States_and_Cities.json")
+		if jErr != nil {
+			fmt.Println(jErr)
 		}
-
-		var states map[string] []string
-
-		byteValue, _ := ioutil.ReadAll(jsonFile)
-		json.Unmarshal(byteValue, &states)
 
 		defer jsonFile.Close()
 
-		if states[state] == nil {
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+		states := new(States)
+		json.Unmarshal(byteValue, &states)
 
-			http.NotFound(w, r)
+		if !states.Has(state) {
+
+			json.NewEncoder(w).Encode(map[string] string {
+				"error": "Not found",
+			})
 		} else {
 
-			json.NewEncoder(w).Encode(states[state])
+			json.NewEncoder(w).Encode(states.Get(state))
 		}
 	})
 
-	http.ListenAndServe(port, r)
+	http.ListenAndServe(":8001", r)
 }

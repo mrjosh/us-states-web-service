@@ -10,8 +10,4 @@ WORKDIR $GOPATH/src/states-webservice
 
 RUN go get
 
-RUN go build -o server .
-
 EXPOSE 8001
-
-CMD ["./server", ":8001"]
